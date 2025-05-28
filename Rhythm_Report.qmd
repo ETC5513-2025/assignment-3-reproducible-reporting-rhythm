@@ -1,12 +1,45 @@
 ---
-title: "Rhythm_Report"
-format: html
+title: "Rhythm Report"
+author: Pranav Sajeev, Melisa Melisa, Ibtesam Ifaz
+format:
+  html:
+    toc: true
+    toc-title: Contents
+    theme: cosmo
+  pdf: default
 editor: visual
 ---
 
 ```{r}
+#| echo: false
+#| message: false
+#| warning: false
 library(tidyverse)
 library(knitr)
 library(ggplot2)
 library(readr)
 ```
+
+## Executive Summary
+
+In this report, we will be looking at how the change from in-person learning to online learning during the period of COVID-19 has affected student's academic performance. The main findings are that the students are able to maintain their academic progress regardless of the change. However, considering the dataset it based on students in India, the groups that were mainly affected by the change were students in Class 10 and Class 12, who had public exams to prepare for in those years.
+
+## Introduction
+
+The transition to online learning during the COVID-19 pandemic significantly altered many students’ academic environments and daily routines. Widespread increases in screen exposure, reductions in physical activity, and irregular sleep patterns were observed among students. These lifestyle changes have prompted growing concern regarding their potential impact on mental health, particularly with respect to stress, anxiety, and academic performance. Understanding how such factors influence student well-being is essential, especially as digital learning continues to play a central role in education.
+
+This report analyzes survey data collected from students between March and May 2023, with the intent of identifying relationships between lifestyle habits and mental health outcomes. The dataset consists of 1,000 observations of students enrolled in both schools and universities. It includes variables such as sleep duration, screen time, exercise frequency, stress levels, and exam-related anxiety. In this report, we seek to determine which behaviors are most closely associated with mental health challenges. The insights gained may support the development of targeted interventions to promote student wellness in remote or hybrid learning settings.
+
+## Conclusion
+
+From the analysis we can see that the affected groups are ones with public exams. This may be due to the fact that the students in those classes require more personal attention that online classes may not be able to provide.
+
+Reccomendations:
+
+For data collection, we need more numeric variables as change in performance needs to be recorded more accurately for data analysis.
+
+Perhaps use different models to reach solutions. More complex models may be able to find more connections between the variables.
+
+maybe use a different set of variables.
+
+\
