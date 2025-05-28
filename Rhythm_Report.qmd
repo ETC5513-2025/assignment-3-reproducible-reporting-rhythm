@@ -1,12 +1,33 @@
 ---
-title: "Rhythm_Report"
-format: html
-editor: visual
+title: "ETC5513-Assignment3"
+author: "Group_03"
+format:
+  html :
+    toc: true 
+    number-sections: true
+    crossref:
+      sec-prefix: "Section"
+      sec-labels: "letters-lower"
 ---
 
 ```{r}
-library(tidyverse)
-library(knitr)
-library(ggplot2)
-library(readr)
+#| echo: false
+#| warning: false
+#| message: false 
+#| code-summary: "Library"
+
+library (rmarkdown)
+library (knitr)
+library (tidyverse)
+library (readr)
+library (kableExtra)
+library (ggplot2)
+library (dplyr)
+library (quarto)
+library (tidytuesdayR)
+library(stringr)
+library(ggrepel)
+library(tidymodels)
+library(GGally)  
+
 ```
