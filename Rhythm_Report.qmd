@@ -20,12 +20,25 @@ editor: visual
 
 ```{r}
 #| echo: false
-#| message: false
 #| warning: false
-library(tidyverse)
-library(knitr)
-library(ggplot2)
-library(readr)
+#| message: false 
+#| code-summary: "Library"
+
+library (rmarkdown)
+library (knitr)
+library (tidyverse)
+library (readr)
+library (kableExtra)
+library (ggplot2)
+library (dplyr)
+library (quarto)
+library (tidytuesdayR)
+library(stringr)
+library(ggrepel)
+library(tidymodels)
+library(GGally)  
+
+
 ```
 
 ## Executive Summary
