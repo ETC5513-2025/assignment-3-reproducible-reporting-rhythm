@@ -1,0 +1,49 @@
+---
+title: "Student Mental Health During Online Learning"
+format:
+  revealjs:
+    theme: simple
+    transition: fade
+    incremental: true
+    slide-number: true
+    toc: false
+    chalkboard: false
+execute:
+  echo: true
+---
+
+## Ifaz, Melisa & Pranav {.animated.zoomIn}
+
+
+# Exploring Behavioral Correlates of Wellbeing
+
+---
+
+## Problem Introduction {.animated.slideInLeft}
+
+- Online learning during COVID-19 disrupted student life.
+- Increased phone usage and screen time have been associated with worsening mental health.
+- This project explores links between digital behavior and student well-being.
+
+---
+
+## Dataset Overview {.animated.slideInRight}
+
+- Dataset contains **1000 students** from high schools and universities.
+- Key variables:
+  - Phone Usage (hours)
+  - Sleep Duration
+  - Stress, Anxiety, Depression Levels
+  - Gender, Institution Type, Academic Performance
+
+---
+
+## Methods {.animated.slideInRight}
+
+---
+
+## Results {.animated.slideInRight}
+
+---
+
+## Recommendations {.animated.slideInRight}
