@@ -10,3 +10,18 @@ library(knitr)
 library(ggplot2)
 library(readr)
 ```
+
+
+# Results 
+
+The key variable in this report is academic performance. We compared the observations on the basis of the students' academic performance 
+
+From our regression analysis we we look into the the correlation between screen time and academic performance 
+
+In this analysis we assume that screen time is negatively correlated academic performance, meaning high screen time would result in poor academic performance 
+
+- Figure 
+
+Across all educational level students had the same proportion of results spread across the population. However we noticed in grade 10 and grade 12, majority students had unchanged grades. 
+
+During grade 11 and grade 12 student sit for a board exam. Given our observation from the data set - could this mean online learning had no effect among students who sat for board exam?
