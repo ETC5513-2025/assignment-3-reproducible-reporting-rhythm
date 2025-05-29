@@ -37,6 +37,7 @@ library(stringr)
 library(ggrepel)
 library(tidymodels)
 library(GGally)  
+library(tidytable)
 
 
 ```
@@ -50,6 +51,407 @@ In this report, we will be looking at how the change from in-person learning to 
 The transition to online learning during the COVID-19 pandemic significantly altered many students’ academic environments and daily routines. Widespread increases in screen exposure, reductions in physical activity, and irregular sleep patterns were observed among students. These lifestyle changes have prompted growing concern regarding their potential impact on mental health, particularly with respect to stress, anxiety, and academic performance. Understanding how such factors influence student well-being is essential, especially as digital learning continues to play a central role in education.
 
 This report analyzes survey data collected from students between March and May 2023, with the intent of identifying relationships between lifestyle habits and mental health outcomes. The dataset consists of 1,000 observations of students enrolled in both schools and universities. It includes variables such as sleep duration, screen time, exercise frequency, stress levels, and exam-related anxiety. In this report, we seek to determine which behaviors are most closely associated with mental health challenges. The insights gained may support the development of targeted interventions to promote student wellness in remote or hybrid learning settings.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Download and  Spool Dataset"
+#| message: false 
+
+data <- read_csv("Student Mental Health Analysis During Online Learning.csv")
+head(data,3)
+
+
+```
+
+# Methodology
+
+![](Images/Pict%20Methodology.png) This study applied multinomial logistic regression to evaluate the association between multiple independent variables and a categorical outcome with three levels: "Same", "Increase", and "Decrease". The independent variables used in the model were a combination of numerical (e.g., age, screen time) and categorical predictors (e.g., gender, education level).
+
+![](Images/Pict%20Methodology%202.png) This method is appropriate when the response variable is nominal with more than two categories and does not follow a natural order. The "Same" category was treated as the reference level in this model.
+
+Prior to model fitting, standard preprocessing steps were applied, including checking for missing values, standardizing numerical variables, and encoding categorical variables into dummy indicators to enable their use in the model.
+
+The regression model estimates the log-odds of each non-reference category relative to the reference category. Separate sets of coefficients are produced for predicting "Increase" and "Decrease" outcomes compared to "Same". The model was estimated using maximum likelihood estimation.
+
+The output of the model included regression coefficients, standard errors, and p-values for each predictor variable across both comparisons. The significance of each variable was evaluated using Wald tests, with a threshold of p \< 0.05 considered statistically significant. This approach allowed for identifying which variables had a meaningful association with changes in the response category.
+
+This methodology provided a clear framework for determining the statistical significance of each predictor and contributed to understanding the factors associated with outcome variations in the study population.
+
+```{r}
+#| label: tbl-variable
+#| code-fold: true
+#| code-summary: "Summary Data"
+#| tbl-cap: "Data Set Description"
+#| message: false
+
+# If "Name" is one of the column names, remove it before summarising
+data_summary <- data[ , colnames(data) != "Name"]
+
+# Create summary vector for remaining variables
+summary_vec <- sapply(data_summary, function(x) {
+  if (is.numeric(x)) {
+    paste0(min(x, na.rm = TRUE), " – ", max(x, na.rm = TRUE))
+  } else {
+    paste(unique(x), collapse = ", ")
+  }
+})
+
+# Create summary table and add a blank 'Name' row at the top
+summary_table <- data.frame(
+  Variable = names(summary_vec),
+  Value = summary_vec,
+  stringsAsFactors = FALSE
+)
+
+summary_table <- rbind(
+  data.frame(Variable = "Name", Value = "", stringsAsFactors = FALSE),
+  summary_table
+)
+
+# Remove column names
+colnames(summary_table) <- c("", "")
+
+# Display clean 2-column table (no headers, no row names)
+knitr::kable(summary_table, caption = "Summary of Variables", row.names = FALSE)
+
+
+```
+
+```{r}
+#| label: "fig-Proportion-Perfomance"
+#| fig-cap: "Proportion of Student based on Academic Performance"
+#| code-fold: true
+#| code-summary: "Data Exploration: Chart for Categorical Variables"
+#| message: false
+
+# Define custom colors for the categories
+base_colors <- c(
+  "Declined" = "#FFD1BA",  # light orange-pink
+  "Improved" = "#C0E7D5",  # light green
+  "Same"     = "#D2B48C"   # tan/brown
+)
+
+# Create pie chart
+data %>%
+  drop_na(`Academic Performance Change`) %>%
+  count(`Academic Performance Change`) %>%
+  mutate(
+    prop = n / sum(n),
+    label = paste0(`Academic Performance Change`, "\n", percent(prop, accuracy = 1))
+  ) %>%
+  ggplot(aes(x = "", y = prop, fill = `Academic Performance Change`)) +
+  geom_col(width = 1, color = "white") +
+  coord_polar(theta = "y") +
+  geom_text(aes(label = label), position = position_stack(vjust = 0.5), size = 4) +
+  scale_fill_manual(values = base_colors) +  # Apply custom colour
+  labs(
+    title = "",
+    x = NULL, y = NULL, fill = NULL
+  ) +
+  theme_void()
+
+```
+
+Most students either maintained or improved their academic performance, with only 30% reporting a decline. This reflects a mixed impact of the learning environment, where some students thrived while others struggled.
+
+# Analysis
+
+## Data Exploration and Preprocessing
+
+```{r}
+#| code-fold: true
+#| code-summary: "Change the Variables Name"
+#| message: false
+
+data <- data |> rename(
+  Screen_Time = `Screen Time (hrs/day)`,
+  Stress_Level = `Stress Level`,
+  Sleep_Duration = `Sleep Duration (hrs)`,
+  Physical_Activity = `Physical Activity (hrs/week)`,
+  Education_Level = `Education Level`,
+  Anxious_Before_Exams = `Anxious Before Exams`,
+  Academic_Performance_Change = `Academic Performance Change`)
+
+colnames(data)
+
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Add New Classification Variable for Education Level"
+#| message: false
+
+final_data <- data |>
+  mutate(Education_Level_Group = case_when(
+    str_starts(Education_Level, "B") ~ "Bachelor",
+    str_starts(Education_Level, "M") ~ "Master",
+    str_detect(Education_Level, "8$|9$") ~ "Middle",
+    TRUE ~ "High"
+  ))
+
+final_data |> group_by(Education_Level) |> select (Education_Level,Education_Level_Group)
+
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Summary of Numerical Variables"
+#| message: false
+
+summary(data |> select(Age, Screen_Time , Sleep_Duration, Physical_Activity))
+```
+
+```{r}
+#| label: "fig-Pie-Chart-CatVariables"
+#| fig-cap: "Summary of Students Proportion based on Categorical Variables"
+#| code-fold: true
+#| code-summary: "Chart for Numberical Variables"
+#| message: false
+
+
+# Define categorical variables and base colors
+categorical_vars <- c("Gender", "Education_Level_Group", "Stress_Level", "Anxious_Before_Exams")
+base_colors <- c("#FFD1BA", "#C0E7D5", "#D2B48C", "#ADD8E6")
+
+# Prepare long-format data
+df <- final_data %>%
+  select(all_of(categorical_vars)) %>%
+  pivot_longer(cols = everything(), names_to = "variable", values_to = "value") %>%
+  drop_na()
+
+# Summarize and calculate proportions
+df_summary <- df %>%
+  group_by(variable, value) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(variable) %>%
+  mutate(
+    prop = n / sum(n),
+    label = paste0(percent(prop, accuracy = 1))
+  ) %>%
+  ungroup() %>%
+  mutate(
+    var_val = paste(variable, value, sep = "_"),
+    value = fct_reorder(value, prop)
+  )
+
+# Generate unique colors
+n_colors <- df_summary %>% distinct(var_val) %>% nrow()
+all_colors <- colorRampPalette(base_colors)(n_colors)
+
+color_lookup <- df_summary %>%
+  distinct(var_val) %>%
+  mutate(color = all_colors) %>%
+  deframe()
+
+# Final horizontal bar plot
+ggplot(df_summary, aes(x = prop, y = value, fill = var_val)) +
+  geom_col(width = 0.6, color = "white") +
+  geom_text(aes(label = label), hjust = -0.1, color = "black", size = 3) +
+  facet_wrap(~variable, scales = "free_y", ncol = 2) +
+  scale_fill_manual(values = color_lookup) +
+  scale_x_continuous(labels = percent_format(accuracy = 1), expand = expansion(mult = c(0, 0.2))) +
+  labs(
+    title = "",
+    x = "Proportion",
+    y = NULL
+  ) +
+  theme_minimal() +
+  theme(
+    strip.text = element_text(size = 11, face = "bold"),
+    axis.text = element_text(size = 9),
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold")
+  )
+```
+
+The charts show that 51% of students reported feeling anxious before exams. Most participants were enrolled in master’s programs (41%). The gender distribution was balanced between male and female (both 48%), with 5% identifying as “Other.” Regarding stress levels, 49% experienced medium stress, 33% low stress, and 18% high stress.
+
+```{r}
+#| label: "fig-Proportion-Categorical"
+#| fig-cap: "Performance Outcome Breakdown by Categorical Variables"
+#| code-fold: true
+#| code-summary: "Chart for Categorical Variables"
+#| message: false
+
+
+# Categorical Variables
+categorical_vars <- c("Gender", "Education_Level", "Stress_Level", "Anxious_Before_Exams")
+
+# Set up the colours
+pastel_colors <- c(
+  "Declined" = "#FFD1BA",  
+  "Same"     = "#C3CDE6", 
+  "Improved" = "#C0E7D5"   
+)
+
+# Do visualization
+final_data %>%
+  select(all_of(categorical_vars), Academic_Performance_Change) %>%
+  pivot_longer(cols = all_of(categorical_vars), names_to = "variable", values_to = "value") %>%
+  drop_na() %>%
+  group_by(variable, value, Academic_Performance_Change) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(variable, value) %>%
+  mutate(
+    prop = n / sum(n),
+    label_text = percent(prop, accuracy = 1)
+  ) %>%
+  ggplot(aes(
+    x = value,
+    y = prop,
+    fill = factor(Academic_Performance_Change, levels = c("Declined","Improved","Same"))  # 
+  )) +
+  geom_bar(stat = "identity", position = "stack", color = "white") +
+  geom_text(
+    aes(label = label_text),
+    position = position_stack(vjust = 0.5),
+    color = "black", size = 3
+  ) +
+  facet_wrap(~variable, scales = "free_x") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  scale_fill_manual(values = pastel_colors) + 
+  labs(
+    title = " ",
+    x = "Categorical Variables",
+    y = "Proportion",
+    fill = "Performance Change"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    strip.text = element_text(face = "bold"),
+    plot.title = element_text(size = 14, face = "bold", hjust = 0.5)
+  )
+
+```
+
+There is no notable difference in academic performance change across groups based on exam anxiety, gender, or stress level, as the proportions of declined, improved, and unchanged performance remain relatively similar. The program appears to perform well for Master’s and Bachelor of Arts students. However, among high school and middle school students, the program is less effective.
+
+```{r}
+#| label: "Scatte-Plot-Numerical-Variables"
+#| fig-cap: "Performance Outcome Breakdown by Categorical Variables"
+#| code-fold: true
+#| code-summary: "Chart for Numberical Variables"
+#| message: false
+
+
+data_numerical <- final_data %>%
+  select(Age, Screen_Time, Sleep_Duration, Physical_Activity, Academic_Performance_Change) %>%
+  as.data.frame()
+
+ggpairs(
+  data_numerical,
+  columns = 1:4, # Column for Numerical Variables
+  aes(color = Academic_Performance_Change)
+)
+
+```
+
+There is no distinct pattern that classifies academic performance change based on the observed continuous variables. For example, students with less screen time or more physical activity are not consistently associated with improved performance. Correlation values across age, screen time, sleep duration, and physical activity remain weak, suggesting no strong relationship with performance outcomes.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Add New Variables"
+
+
+#Code some categorical variables
+final_data_add<- final_data %>%
+  mutate(
+    Stress_Level_Code = case_when(
+      `Stress_Level` == "High" ~ 3,
+      `Stress_Level` == "Medium" ~ 2,
+      `Stress_Level` == "Low" ~ 1,
+      TRUE ~ NA_real_
+    ),
+    Anxious_Before_Exams_Code = case_when(
+    `Anxious_Before_Exams` == "Yes" ~ 1,
+    `Anxious_Before_Exams` == "No" ~ 0,
+      TRUE ~ NA_real_
+    )
+  )
+
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Create Dummy Variables"
+
+# create dummy variables
+final_data_add  <- final_data_add |>
+  tidytable::get_dummies(cols = c(Gender,Education_Level))
+
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Standardize Numerical Data and Define Final Data for Analysis"
+
+
+# Select the numeric column
+
+final_data_add <- as.data.frame(final_data_add)
+
+numeric_vars <- names(final_data_add|> select(Age,Screen_Time,Sleep_Duration,Physical_Activity))
+
+
+
+# Calculate mean and sd of training
+mean <- sapply(final_data_add[numeric_vars], mean, na.rm = TRUE)
+sd<- sapply(final_data_add[numeric_vars], sd, na.rm = TRUE)
+
+# add new column and do standardize
+for (var in numeric_vars) {
+  std_col <- paste0(var, "_std")
+  
+  final_data_add[[std_col]] <- (final_data_add[[var]] - mean[[var]]) / sd[[var]]
+ }
+
+# final_data
+final_data_analysis <- final_data_add |> select(
+    ends_with("_std"),
+    Stress_Level_Code,
+    Anxious_Before_Exams_Code,
+    starts_with("Gender_"), 
+    starts_with("Education_Level_"), 
+    Academic_Performance_Change,
+    Name
+  )
+
+final_data_analysis  <- final_data_analysis %>%
+  mutate(Academic_Performance_Change = as.factor(Academic_Performance_Change))
+
+```
+
+## Data Modelling
+
+```{r}
+#| code-fold: true
+#| code-summary: "Create the Logistic Regression Model"
+
+final_data_analysis <- final_data_analysis %>%
+  mutate(Academic_Performance_Change = relevel(Academic_Performance_Change, ref = "Same"))
+
+
+log_fit <- multinom_reg() |> 
+  fit(Academic_Performance_Change ~ ., 
+      data = final_data_analysis|> select(-Name,-Education_Level_Group))
+
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Calculate the P-Value"
+
+
+z <- summary(log_fit$fit)$coefficients / summary(log_fit$fit)$standard.errors
+p <- 2 * (1 - pnorm(abs(z)))
+p  
+
+
+
+```
+
+Compared to students whose performance remained the same, Class 10 students experienced a significantly higher rate of academic decline (p = 0.027). This suggests that the decline in performance was most prominent among Class 10 students.
 
 ## Conclusion
 
