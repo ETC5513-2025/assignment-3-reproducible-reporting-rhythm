@@ -1,12 +1,20 @@
 ---
 title: "Rhythm Report"
-author: Pranav Sajeev, Melisa Melisa, Ibtesam Ifaz
+author: Pranav Sajeev, Melisa, Ibtesam Ifaz
 format:
   html:
     toc: true
     toc-title: Contents
     theme: cosmo
-  pdf: default
+  pdf:
+    toc: true
+    toc-depth: 2
+    number-sections: true
+    include-in-header: toc.tex
+    keep-tex: true
+fontsize: 11pt
+mainfont: "Times New Roman"
+geometry: margin=1in
 editor: visual
 ---
 
@@ -43,5 +51,3 @@ Recommendations:
 -   Use different models to reach solutions. More complex models, like ones that add variable interaction, may be able to find more connections between the variables.
 
 -   Additional variables that measure quality of the interaction in the lecture, internet connection, and metrics on motivation to study would greatly increase the utility of the data.
-
-\
