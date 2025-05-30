@@ -2,6 +2,7 @@
 title: "ETC5513-Assignment3"
 author: "Group_03"
 format:
+  pdf: default
   html :
     toc: true 
     number-sections: true
@@ -34,40 +35,36 @@ library(tidytable)
 ```
 
 ```{r}
-#| code-fold: true
+#| echo: false
 #| code-summary: "Download and  Spool Dataset"
 #| message: false 
 
 data <- read_csv("Student Mental Health Analysis During Online Learning.csv")
-head(data,3)
 
 
 ```
 
 # Methodology
 
-![](Images/Pict Methodology.png)
-This study applied multinomial logistic regression to evaluate the association between multiple independent variables and a categorical outcome with three levels: "Same", "Increase", and "Decrease". The independent variables used in the model were a combination of numerical (e.g., age, screen time) and categorical predictors (e.g., gender, education level).
+![](Images/Pict%20Methodology.png) This study applied multinomial logistic regression to evaluate the association between multiple independent variables and a categorical outcome with three levels: "Same", "Increase", and "Decrease". The independent variables used in the model were a combination of numerical (e.g., age, screen time) and categorical predictors (e.g., gender, education level).
 
-
-![](Images/Pict Methodology 2.png)
-This method is appropriate when the response variable is nominal with more than two categories and does not follow a natural order. The "Same" category was treated as the reference level in this model.
+![](Images/Pict%20Methodology%202.png) This method is appropriate when the response variable is nominal with more than two categories and does not follow a natural order. The "Same" category was treated as the reference level in this model.
 
 Prior to model fitting, standard preprocessing steps were applied, including checking for missing values, standardizing numerical variables, and encoding categorical variables into dummy indicators to enable their use in the model.
 
 The regression model estimates the log-odds of each non-reference category relative to the reference category. Separate sets of coefficients are produced for predicting "Increase" and "Decrease" outcomes compared to "Same". The model was estimated using maximum likelihood estimation.
 
-The output of the model included regression coefficients, standard errors, and p-values for each predictor variable across both comparisons. The significance of each variable was evaluated using Wald tests, with a threshold of p < 0.05 considered statistically significant. This approach allowed for identifying which variables had a meaningful association with changes in the response category.
+The output of the model included regression coefficients, standard errors, and p-values for each predictor variable across both comparisons. The significance of each variable was evaluated using Wald tests, with a threshold of p \< 0.05 considered statistically significant. This approach allowed for identifying which variables had a meaningful association with changes in the response category.
 
-This methodology provided a clear framework for determining the statistical significance of each predictor and contributed to understanding the factors associated with outcome variations in the study population.
-
+This methodology provided a clear framework for determining the statistical significance of each predictor and contributed to understanding the factors associated with outcome variations in the study population.  For the variables information, please see @tbl-variable
 
 ```{r}
 #| label: tbl-variable
-#| code-fold: true
+#| echo: false
 #| code-summary: "Summary Data"
 #| tbl-cap: "Data Set Description"
 #| message: false
+
 
 # If "Name" is one of the column names, remove it before summarising
 data_summary <- data[ , colnames(data) != "Name"]
@@ -97,16 +94,17 @@ summary_table <- rbind(
 colnames(summary_table) <- c("", "")
 
 # Display clean 2-column table (no headers, no row names)
-knitr::kable(summary_table, caption = "Summary of Variables", row.names = FALSE)
+knitr::kable(summary_table, caption = "", row.names = FALSE)
 
 
 ```
 
 
+
 ```{r}
 #| label: "fig-Proportion-Perfomance"
 #| fig-cap: "Proportion of Student based on Academic Performance"
-#| code-fold: true
+#| echo: false
 #| code-summary: "Data Exploration: Chart for Categorical Variables"
 #| message: false
 
@@ -137,9 +135,8 @@ data %>%
   theme_void()
 
 ```
-Most students either maintained or improved their academic performance, with only 30% reporting a decline. This reflects a mixed impact of the learning environment, where some students thrived while others struggled.
 
-
+Based on @fig-Proportion-Perfomance, most students either maintained or improved their academic performance, with only 30% reporting a decline. This reflects a mixed impact of the learning environment, where some students thrived while others struggled.
 
 # Analysis
 
@@ -149,6 +146,7 @@ Most students either maintained or improved their academic performance, with onl
 #| code-fold: true
 #| code-summary: "Change the Variables Name"
 #| message: false
+#| echo: false
 
 data <- data |> rename(
   Screen_Time = `Screen Time (hrs/day)`,
@@ -159,7 +157,7 @@ data <- data |> rename(
   Anxious_Before_Exams = `Anxious Before Exams`,
   Academic_Performance_Change = `Academic Performance Change`)
 
-colnames(data)
+
 
 ```
 
@@ -167,6 +165,7 @@ colnames(data)
 #| code-fold: true
 #| code-summary: "Add New Classification Variable for Education Level"
 #| message: false
+#| echo: false
 
 final_data <- data |>
   mutate(Education_Level_Group = case_when(
@@ -176,25 +175,19 @@ final_data <- data |>
     TRUE ~ "High"
   ))
 
-final_data |> group_by(Education_Level) |> select (Education_Level,Education_Level_Group)
+
 
 ```
 
 
-```{r}
-#| code-fold: true
-#| code-summary: "Summary of Numerical Variables"
-#| message: false
-
-summary(data |> select(Age, Screen_Time , Sleep_Duration, Physical_Activity))
-```
 
 ```{r}
 #| label: "fig-Pie-Chart-CatVariables"
 #| fig-cap: "Summary of Students Proportion based on Categorical Variables"
-#| code-fold: true
+#| echo: false
 #| code-summary: "Chart for Numberical Variables"
 #| message: false
+
 
 
 # Define categorical variables and base colors
@@ -232,6 +225,11 @@ color_lookup <- df_summary %>%
   deframe()
 
 # Final horizontal bar plot
+df_summary <- df_summary %>%
+  mutate(
+    variable = gsub("_", " ", variable)
+  )
+
 ggplot(df_summary, aes(x = prop, y = value, fill = var_val)) +
   geom_col(width = 0.6, color = "white") +
   geom_text(aes(label = label), hjust = -0.1, color = "black", size = 3) +
@@ -252,13 +250,12 @@ ggplot(df_summary, aes(x = prop, y = value, fill = var_val)) +
   )
 ```
 
-The charts show that 51% of students reported feeling anxious before exams. Most participants were enrolled in master’s programs (41%). The gender distribution was balanced between male and female (both 48%), with 5% identifying as “Other.” Regarding stress levels, 49% experienced medium stress, 33% low stress, and 18% high stress.
-
+For @fig-Pie-Chart-CatVariables, the charts show that 51% of students reported feeling anxious before exams. Most participants were enrolled in master’s programs (41%). The gender distribution was balanced between male and female (both 48%), with 5% identifying as “Other.” Regarding stress levels, 49% experienced medium stress, 33% low stress, and 18% high stress.
 
 ```{r}
 #| label: "fig-Proportion-Categorical"
 #| fig-cap: "Performance Outcome Breakdown by Categorical Variables"
-#| code-fold: true
+#| echo: false
 #| code-summary: "Chart for Categorical Variables"
 #| message: false
 
@@ -285,6 +282,11 @@ final_data %>%
     prop = n / sum(n),
     label_text = percent(prop, accuracy = 1)
   ) %>%
+  
+  mutate(
+  label_text = percent(prop, accuracy = 1),
+  variable = gsub("_", " ", variable)
+) |>
   ggplot(aes(
     x = value,
     y = prop,
@@ -314,33 +316,34 @@ final_data %>%
 
 ```
 
-There is no notable difference in academic performance change across groups based on exam anxiety, gender, or stress level, as the proportions of declined, improved, and unchanged performance remain relatively similar. The program appears to perform well for Master’s and Bachelor of Arts students. However, among high school and middle school students, the program is less effective.
+Meanwhile @fig-Proportion-Categorical, there is no notable difference in academic performance change across groups based on exam anxiety, gender, or stress level, as the proportions of declined, improved, and unchanged performance remain relatively similar. The program appears to perform well for Master’s and Bachelor of Arts students. However, among high school and middle school students, the program is less effective.
 
-
-```{r}
-#| label: "Scatte-Plot-Numerical-Variables"
+```{r }
+#| label: "fig-Numerical-Variables"
 #| fig-cap: "Performance Outcome Breakdown by Categorical Variables"
-#| code-fold: true
-#| code-summary: "Chart for Numberical Variables"
-#| message: false
+#| echo: false
 
 
 data_numerical <- final_data %>%
   select(Age, Screen_Time, Sleep_Duration, Physical_Activity, Academic_Performance_Change) %>%
+  rename_with(~ gsub("_", " ", .x), .cols = 1:4) %>%
   as.data.frame()
+
 
 ggpairs(
   data_numerical,
-  columns = 1:4, # Column for Numerical Variables
+  columns = 1:4,
   aes(color = Academic_Performance_Change)
 )
 
 ```
-There is no distinct pattern that classifies academic performance change based on the observed continuous variables. For example, students with less screen time or more physical activity are not consistently associated with improved performance. Correlation values across age, screen time, sleep duration, and physical activity remain weak, suggesting no strong relationship with performance outcomes.
+
+Then for @fig-Numerical-Variables, there is no distinct pattern that classifies academic performance change based on the observed continuous variables. For example, students with less screen time or more physical activity are not consistently associated with improved performance. Correlation values across age, screen time, sleep duration, and physical activity remain weak, suggesting no strong relationship with performance outcomes.
 
 ```{r}
 #| code-fold: true
 #| code-summary: "Add New Variables"
+#| echo: false
 
 
 #Code some categorical variables
@@ -364,13 +367,13 @@ final_data_add<- final_data %>%
 ```{r}
 #| code-fold: true
 #| code-summary: "Create Dummy Variables"
+#| echo: false
 
 # create dummy variables
 final_data_add  <- final_data_add |>
   tidytable::get_dummies(cols = c(Gender,Education_Level))
 
 ```
-
 
 ```{r}
 #| code-fold: true
@@ -411,9 +414,11 @@ final_data_analysis  <- final_data_analysis %>%
   mutate(Academic_Performance_Change = as.factor(Academic_Performance_Change))
 
 ```
+
 ## Data Modelling
+
 ```{r}
-#| code-fold: true
+#| echo: false
 #| code-summary: "Create the Logistic Regression Model"
 
 final_data_analysis <- final_data_analysis %>%
@@ -427,15 +432,40 @@ log_fit <- multinom_reg() |>
 ```
 
 ```{r}
-#| code-fold: true
+#| echo: false
 #| code-summary: "Calculate the P-Value"
+#| label: tbl-pvalue
+#| tbl-cap: "P_value Summary"
+#| message: false
+
 
 
 z <- summary(log_fit$fit)$coefficients / summary(log_fit$fit)$standard.errors
 p <- 2 * (1 - pnorm(abs(z)))
-p  
+
+
+
+# Load reshape2 (install jika belum ada)
+if (!require(reshape2)) install.packages("reshape2")
+library(reshape2)
+
+# Change to p matrix format
+p_long <- melt(p, varnames = c("Outcome", "Term"), value.name = "P_value")
+
+# Rounding p_value
+p_long$P_value <- round(p_long$P_value, 4)
+
+# Change to horizontal
+p_wide <- dcast(p_long, Outcome ~ Term, value.var = "P_value")
+
+# Show table value in horizontal
+knitr::kable(
+  p_wide[, c("Outcome", "`Education_Level_Class 10`")],
+  caption = ""
+)
 
 
 
 ```
-Compared to students whose performance remained the same, Class 10 students experienced a significantly higher rate of academic decline (p = 0.027). This suggests that the decline in performance was most prominent among Class 10 students.
+
+From @tbl-pvalue, it tells about students whose performance remained the same, Class 10 students experienced a significantly higher rate of academic decline (p = 0.027). This suggests that the decline in performance was most prominent among Class 10 students.
