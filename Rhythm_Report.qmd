@@ -42,6 +42,7 @@ library(tidytable)
 
 ```
 
+<<<<<<< HEAD
 ## Executive Summary
 
 In this report, we will be looking at how the change from in-person learning to online learning during the period of COVID-19 has affected student's academic performance. The main findings are that the students are able to maintain their academic progress regardless of the change. However, considering the dataset it based on students in India, the groups that were mainly affected by the change were students in Class 10 and Class 12, who had public exams to prepare for in those years.
@@ -507,4 +508,19 @@ Recommendations:
 -   Use different models to reach solutions. More complex models, like ones that add variable interaction, may be able to find more connections between the variables.
 
 -   Additional variables that measure quality of the interaction in the lecture, internet connection, and metrics on motivation to study would greatly increase the utility of the data.
+
+
+# Results 
+
+The key variable in this report is academic performance. We compared the observations on the basis of the students' academic performance 
+
+From our regression analysis we we look into the the correlation between screen time and academic performance 
+
+In this analysis we assume that screen time is negatively correlated academic performance, meaning high screen time would result in poor academic performance 
+
+- Figure 
+
+Across all educational level students had the same proportion of results spread across the population. However we noticed in grade 10 and grade 12, majority students had unchanged grades. 
+
+During grade 11 and grade 12 student sit for a board exam. Given our observation from the data set - could this mean online learning had no effect among students who sat for board exam?
 
