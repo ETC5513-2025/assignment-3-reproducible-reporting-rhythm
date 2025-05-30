@@ -32,14 +32,16 @@ This report analyzes survey data collected from students between March and May 2
 
 ## Conclusion
 
-From the analysis we can see that the affected groups are ones with public exams. This may be due to the fact that the students in those classes require more personal attention that online classes may not be able to provide.
+From the analysis of the data we can see that the p-values show the only significant variable to the academic performance is the level of education. From this we can infer that the groups mainly affected are students with public exams. This may be due to the fact that the students in those classes require more personal attention that online classes may not be able to provide.
 
-Reccomendations:
+Recommendations:
 
-For data collection, we need more numeric variables as change in performance needs to be recorded more accurately for data analysis.
+-   For data collection, we need more numeric variables as change in performance needs to be recorded more accurately for data analysis.
 
-Perhaps use different models to reach solutions. More complex models may be able to find more connections between the variables.
+-   For the purpose of comparison, data from before COVID-19 would be highly beneficial to enable more efficient comparisons.
 
-maybe use a different set of variables.
+-   Use different models to reach solutions. More complex models, like ones that add variable interaction, may be able to find more connections between the variables.
+
+-   Additional variables that measure quality of the interaction in the lecture, internet connection, and metrics on motivation to study would greatly increase the utility of the data.
 
 \
