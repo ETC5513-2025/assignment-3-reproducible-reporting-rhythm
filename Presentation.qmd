@@ -1,0 +1,252 @@
+---
+title: "Exploring Behavioral Correlates of Academic Performance"
+author: "Ifaz, Melisa & Pranav"
+format:
+  revealjs:
+    theme: simple
+    transition: fade
+    background-transition: none
+    slide-number: true
+    chalkboard: false
+    hash: true
+    history: true
+    hash-one-based-index: false
+    fragment-in-url: false
+    pdf-separate-fragments: false
+    lang: en
+    auto-stretch: true
+    controls-tutorial: false
+---
+
+```{r}
+#| message: false
+#| warning: false
+#| include: false
+library(tidyverse)
+library(rmarkdown)
+library(knitr)
+library(readr)
+library(kableExtra)
+library(ggplot2)
+library(dplyr)
+library(quarto)
+library(tidytuesdayR)
+library(stringr)
+library(ggrepel)
+library(tidymodels)
+library(GGally)
+library(tidytable)
+```
+
+---
+
+## Problem Introduction {.animated.slideInLeft}
+
+:::{.incremental}
+- Online learning during COVID-19 disrupted student life
+- Increased phone usage and screen time have been associated with worsening mental health *(Sherman, 2023)*
+- We will explore if online learning had an effect on students' academic performance 
+:::
+
+---
+
+## Dataset Overview {.animated.slideInRight}
+
+:::{.incremental}
+- Data set contains observations of **1000 students** from high schools and universities.
+- Collected through surveys conducted in June 2023
+```{r}
+#| echo: false
+final_data <- read.csv("student_data.csv")
+kable(head(final_data, 10), caption = "First 10 Observations")
+```
+:::
+
+---
+
+## Methods {.animated.slideInRight}
+
+![](Images/method_1.png)
+
+---
+
+## Methods {.animated.slideInRight}
+
+![](Images/method_2.png)
+
+---
+
+## Summary of students based on categorical variables {.animated.slideInRight}
+
+::: {.columns}
+
+::: {.column width="70%"}
+```{r}
+#| echo: false
+
+categorical_vars <- c("Gender", "Education_Level_Group", "Stress_Level", "Anxious_Before_Exams")
+base_colors <- c("#FFD1BA", "#C0E7D5", "#D2B48C", "#ADD8E6")
+
+df <- final_data %>%
+  select(all_of(categorical_vars)) %>%
+  pivot_longer(cols = everything(), names_to = "variable", values_to = "value") %>%
+  drop_na()
+
+df_summary <- df %>%
+  group_by(variable, value) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(variable) %>%
+  mutate(
+    prop = n / sum(n),
+    label = paste0(percent(prop, accuracy = 1))
+  ) %>%
+  ungroup() %>%
+  mutate(
+    var_val = paste(variable, value, sep = "_"),
+    value = fct_reorder(value, prop)
+  )
+
+n_colors <- df_summary %>% distinct(var_val) %>% nrow()
+all_colors <- colorRampPalette(base_colors)(n_colors)
+
+color_lookup <- df_summary %>%
+  distinct(var_val) %>%
+  mutate(color = all_colors) %>%
+  deframe()
+
+ggplot(df_summary, aes(x = prop, y = value, fill = var_val)) +
+  geom_col(width = 0.6, color = "white") +
+  geom_text(aes(label = label), hjust = -0.1, color = "black", size = 3) +
+  facet_wrap(~variable, scales = "free_y", ncol = 2) +
+  scale_fill_manual(values = color_lookup) +
+  scale_x_continuous(labels = percent_format(accuracy = 1), expand = expansion(mult = c(0, 0.2))) +
+  labs(
+    title = "",
+    x = "Proportion",
+    y = NULL
+  ) +
+  theme_minimal() +
+  theme(
+    strip.text = element_text(size = 11, face = "bold"),
+    axis.text = element_text(size = 9),
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold")
+  )
+```
+:::
+
+::: {.column width="30%" .incremental .small-text}
+
+- <span style="font-size: 0.5em;">More than half of the students reported feeling anxious before exams</span>
+- <span style="font-size: 0.5em;">41% were enrolled in Master’s programs</span>  
+- <span style="font-size: 0.5em;">Gender distribution was balanced</span> 
+- <span style="font-size: 0.5em;">Most students experienced medium stress</span>  
+
+:::
+
+
+:::
+
+---
+
+## Results: Performance outcome breakdown {.animated.slideInRight}
+
+::: {.columns}
+
+::: {.column width="70%"}
+```{r}
+#| echo: false
+
+categorical_vars <- c("Gender", "Education_Level", "Stress_Level", "Anxious_Before_Exams")
+pastel_colors <- c("Declined" = "#FFD1BA", "Same" = "#C3CDE6", "Improved" = "#C0E7D5")
+
+final_data %>%
+  select(all_of(categorical_vars), Academic_Performance_Change) %>%
+  pivot_longer(cols = all_of(categorical_vars), names_to = "variable", values_to = "value") %>%
+  drop_na() %>%
+  group_by(variable, value, Academic_Performance_Change) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(variable, value) %>%
+  mutate(prop = n / sum(n), label_text = percent(prop, accuracy = 1)) %>%
+  ggplot(aes(x = value, y = prop, fill = factor(Academic_Performance_Change, levels = c("Declined", "Improved", "Same")))) +
+  geom_bar(stat = "identity", position = "stack", color = "white") +
+  geom_text(aes(label = label_text), position = position_stack(vjust = 0.5), color = "black", size = 3) +
+  facet_wrap(~variable, scales = "free_x") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  scale_fill_manual(values = pastel_colors) +
+  labs(
+    title = "Proportion of Academic Performance Changes by Category",
+    x = "Category",
+    y = "Proportion",
+    fill = "Performance Change"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    strip.text = element_text(face = "bold"),
+    plot.title = element_text(size = 14, face = "bold", hjust = 0.5)
+  )
+```
+:::
+
+::: {.column width="30%" .incremental .small-text}
+
+- <span style="font-size: 0.5em;">There is no notable difference in performance change based on : Exam anxiety, Gender Stress level</span>
+- <span style="font-size: 0.5em;">The program performs well for Master’s and Bachelor of Arts students</span>
+- <span style="font-size: 0.5em;">The program is less effective for high school and middle school students</span>
+
+:::
+
+:::
+---
+
+## Results: Breakdown by numerical variables {.animated.slideInRight}
+::: {.columns}
+
+::: {.column width="70%"}
+```{r}
+#| echo: false
+
+data_numerical <- final_data %>%
+  select(Age, Screen_Time, Sleep_Duration, Physical_Activity, Academic_Performance_Change) %>%
+  as.data.frame()
+
+ggpairs(
+  data_numerical,
+  columns = 1:4,
+  aes(color = Academic_Performance_Change)
+)
+```
+:::
+
+::: {.column width="30%" .incremental .small-text}
+- <span style="font-size: 0.5em;">No clear pattern was found linking continuous variables to academic performance change</span>
+- <span style="font-size: 0.5em;">Correlation values across age, screen time, sleep duration, and physical activity were weak</span>
+- <span style="font-size: 0.5em;">These results suggest no strong relationship between these variables and performance outcomes</span>
+
+:::
+
+:::
+---
+
+## Discussion: P-value {.animated.slideInRight}
+
+![](Images/results.png)
+
+::: {.incremental}
+- Compared to students whose academic performance remained the same, Class 10 students showed a statistically significant difference (p = 0.02)
+-	Students in Class 10 and 12 shows least improvement
+-	Students taking public exams require more individual attention and guidance
+
+:::
+
+---
+
+## Recommendations {.animated.slideInRight}
+
+:::{.incremental}
+-	Performance indicator should be a numeric variable
+-	Historic data needed for better comparison
+-	Different models, like ones with variable interaction, could be used
+-	Additional variables, like metrics on motivation, internet connection, interaction in the lecture, etc. would greatly help with more holistic analysis
+:::

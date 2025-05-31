@@ -1,6 +1,6 @@
 ---
-title: "Rhythm Report"
-author: Pranav Sajeev, Melisa, Ibtesam Ifaz
+title: ""
+author: ""
 format:
   html:
     toc: true
@@ -10,11 +10,14 @@ format:
     toc: true
     toc-depth: 2
     number-sections: true
+    include-before-body: titlepage.tex
     include-in-header: toc.tex
     keep-tex: true
 fontsize: 11pt
 mainfont: "Times New Roman"
 geometry: margin=1in
+bibliography: references.bib
+cite-method: biblatex
 editor: visual
 ---
 
@@ -42,8 +45,9 @@ library(tidytable)
 
 ```
 
-<<<<<<< HEAD
-## Executive Summary
+\clearpage
+
+# Executive Summary
 
 In this report, we will be looking at how the change from in-person learning to online learning during the period of COVID-19 has affected student's academic performance. The main findings are that the students are able to maintain their academic progress regardless of the change. However, considering the dataset it based on students in India, the groups that were mainly affected by the change were students in Class 10 and Class 12, who had public exams to prepare for in those years.
 
@@ -51,7 +55,7 @@ In this report, we will be looking at how the change from in-person learning to 
 
 The transition to online learning during the COVID-19 pandemic significantly altered many students’ academic environments and daily routines. Widespread increases in screen exposure, reductions in physical activity, and irregular sleep patterns were observed among students. These lifestyle changes have prompted growing concern regarding their potential impact on mental health, particularly with respect to stress, anxiety, and academic performance. Understanding how such factors influence student well-being is essential, especially as digital learning continues to play a central role in education.
 
-This report analyzes survey data collected from students between March and May 2023, with the intent of identifying relationships between lifestyle habits and mental health outcomes. The dataset consists of 1,000 observations of students enrolled in both schools and universities. It includes variables such as sleep duration, screen time, exercise frequency, stress levels, and exam-related anxiety. In this report, we seek to determine which behaviors are most closely associated with mental health challenges. The insights gained may support the development of targeted interventions to promote student wellness in remote or hybrid learning settings.
+This report analyzes survey data collected from students between March and May 2023, with the intent of identifying relationships between lifestyle habits and mental health outcomes. The data set consists of 1,000 observations of students enrolled in both schools and universities. It includes variables such as sleep duration, screen time, exercise frequency, stress levels, and exam-related anxiety. In this report, we seek to determine which behaviors are most closely associated with mental health challenges. The insights gained may support the development of targeted interventions to promote student wellness in remote or hybrid learning settings.
 
 ```{r}
 #| echo: false
@@ -65,17 +69,23 @@ data <- read_csv("Student Mental Health Analysis During Online Learning.csv")
 
 # Methodology
 
-![](Images/Pict%20Methodology.png) This study applied multinomial logistic regression to evaluate the association between multiple independent variables and a categorical outcome with three levels: "Same", "Increase", and "Decrease". The independent variables used in the model were a combination of numerical (e.g., age, screen time) and categorical predictors (e.g., gender, education level).
+This study applied multinomial logistic regression to evaluate the association between multiple independent variables and a categorical outcome with three levels: "Same", "Increase", and "Decrease". The independent variables used in the model were a combination of numerical (e.g., age, screen time) and categorical predictors (e.g., gender, education level).
 
-![](Images/Pict%20Methodology%202.png) This method is appropriate when the response variable is nominal with more than two categories and does not follow a natural order. The "Same" category was treated as the reference level in this model.
+```{r}
+#| echo: false
+#| fig-cap: "Multinomial logistic regression model"
+knitr::include_graphics("Images/regression.png")
+```
 
-Prior to model fitting, standard preprocessing steps were applied, including checking for missing values, standardizing numerical variables, and encoding categorical variables into dummy indicators to enable their use in the model.
+\vspace{12pt}
 
-The regression model estimates the log-odds of each non-reference category relative to the reference category. Separate sets of coefficients are produced for predicting "Increase" and "Decrease" outcomes compared to "Same". The model was estimated using maximum likelihood estimation.
+This method is appropriate when the response variable is nominal with more than two categories and does not follow a natural order. The "Same" category was treated as the reference level in this model.
+
+The regression model estimates the log-odds of each non-reference category relative to the reference category. Separate sets of coefficients are produced for predicting "Improved" and "Declined" outcomes compared to "Same". The model was estimated using maximum likelihood estimation.
 
 The output of the model included regression coefficients, standard errors, and p-values for each predictor variable across both comparisons. The significance of each variable was evaluated using Wald tests, with a threshold of p \< 0.05 considered statistically significant. This approach allowed for identifying which variables had a meaningful association with changes in the response category.
 
-This methodology provided a clear framework for determining the statistical significance of each predictor and contributed to understanding the factors associated with outcome variations in the study population.  For the variables information, please see @tbl-variable
+This methodology provided a clear framework for determining the statistical significance of each predictor and contributed to understanding the factors associated with outcome variations in the study population. For the variables information, please see @tbl-variable
 
 ```{r}
 #| label: tbl-variable
@@ -118,8 +128,6 @@ knitr::kable(summary_table, caption = "", row.names = FALSE)
 
 ```
 
-
-
 ```{r}
 #| label: "fig-Proportion-Perfomance"
 #| fig-cap: "Proportion of Student based on Academic Performance"
@@ -155,13 +163,11 @@ data %>%
 
 ```
 
-
 Based on @fig-Proportion-Perfomance, most students either maintained or improved their academic performance, with only 30% reporting a decline. This reflects a mixed impact of the learning environment, where some students thrived while others struggled.
 
+## Data Exploration
 
-# Analysis
-
-## Data Exploration and Preprocessing
+For @fig-Pie-Chart-CatVariables, the charts show that 51% of students reported feeling anxious before exams. Most participants were enrolled in master’s programs (41%). The gender distribution was balanced between male and female (both 48%), with 5% identifying as “Other.” Regarding stress levels, 49% experienced medium stress, 33% low stress, and 18% high stress.
 
 ```{r}
 #| code-fold: true
@@ -199,8 +205,6 @@ final_data <- data |>
 
 
 ```
-
-
 
 ```{r}
 #| label: "fig-Pie-Chart-CatVariables"
@@ -271,10 +275,6 @@ ggplot(df_summary, aes(x = prop, y = value, fill = var_val)) +
   )
 ```
 
-
-For @fig-Pie-Chart-CatVariables, the charts show that 51% of students reported feeling anxious before exams. Most participants were enrolled in master’s programs (41%). The gender distribution was balanced between male and female (both 48%), with 5% identifying as “Other.” Regarding stress levels, 49% experienced medium stress, 33% low stress, and 18% high stress.
-
-
 ```{r}
 #| label: "fig-Proportion-Categorical"
 #| fig-cap: "Performance Outcome Breakdown by Categorical Variables"
@@ -282,18 +282,19 @@ For @fig-Pie-Chart-CatVariables, the charts show that 51% of students reported f
 #| code-summary: "Chart for Categorical Variables"
 #| message: false
 
+library(scales)
 
-# Categorical Variables
+# Categorical variables to plot
 categorical_vars <- c("Gender", "Education_Level", "Stress_Level", "Anxious_Before_Exams")
 
-# Set up the colours
+# Define pastel color palette
 pastel_colors <- c(
   "Declined" = "#FFD1BA",  
   "Same"     = "#C3CDE6", 
   "Improved" = "#C0E7D5"   
 )
 
-# Do visualization
+# Plot
 final_data %>%
   select(all_of(categorical_vars), Academic_Performance_Change) %>%
   pivot_longer(cols = all_of(categorical_vars), names_to = "variable", values_to = "value") %>%
@@ -303,30 +304,19 @@ final_data %>%
   group_by(variable, value) %>%
   mutate(
     prop = n / sum(n),
-    label_text = percent(prop, accuracy = 1)
+    variable = gsub("_", " ", variable)
   ) %>%
-  
-  mutate(
-  label_text = percent(prop, accuracy = 1),
-  variable = gsub("_", " ", variable)
-) |>
   ggplot(aes(
     x = value,
     y = prop,
-    fill = factor(Academic_Performance_Change, levels = c("Declined","Improved","Same"))  # 
+    fill = factor(Academic_Performance_Change, levels = c("Declined", "Same", "Improved"))
   )) +
   geom_bar(stat = "identity", position = "stack", color = "white") +
-  geom_text(
-    aes(label = label_text),
-    position = position_stack(vjust = 0.5),
-    color = "black", size = 3
-  ) +
   facet_wrap(~variable, scales = "free_x") +
   scale_y_continuous(labels = percent_format(accuracy = 1)) +
-  scale_fill_manual(values = pastel_colors) + 
+  scale_fill_manual(values = pastel_colors) +
   labs(
-    title = " ",
-    x = "Categorical Variables",
+    x = NULL,
     y = "Proportion",
     fill = "Performance Change"
   ) +
@@ -337,10 +327,15 @@ final_data %>%
     plot.title = element_text(size = 14, face = "bold", hjust = 0.5)
   )
 
+
+
 ```
 
-Meanwhile @fig-Proportion-Categorical, there is no notable difference in academic performance change across groups based on exam anxiety, gender, or stress level, as the proportions of declined, improved, and unchanged performance remain relatively similar. The program appears to perform well for Master’s and Bachelor of Arts students. However, among high school and middle school students, the program is less effective.
+# Results
 
+The key variable in this report is academic performance. We compared the observations on the basis of the students' academic performance. Meanwhile @fig-Proportion-Categorical shows there is no notable difference in academic performance change across groups based on exam anxiety, gender, or stress level, as the proportions of declined, improved, and unchanged performance remain relatively similar.
+
+In addition we looked into the correlation between screen time and academic performance because research shows that problematic smartphone use is associated with poor mental health outcomes among youth [@li2023smartphone]. Therefore, in this analysis we assume that screen time is negatively correlated academic performance, meaning high screen time would result in poor academic performance.
 
 ```{r }
 #| label: "fig-Numerical-Variables"
@@ -362,8 +357,7 @@ ggpairs(
 
 ```
 
-
-Then for @fig-Numerical-Variables, there is no distinct pattern that classifies academic performance change based on the observed continuous variables. For example, students with less screen time or more physical activity are not consistently associated with improved performance. Correlation values across age, screen time, sleep duration, and physical activity remain weak, suggesting no strong relationship with performance outcomes.
+@fig-Numerical-Variables illustrates there is no distinct pattern that classifies academic performance change based on the observed continuous variables. For example, students with less screen time are not consistently associated with improved performance. Correlation values across age, screen time, sleep duration, and physical activity remain weak, suggesting no strong relationship with performance outcomes.
 
 ```{r}
 #| code-fold: true
@@ -402,6 +396,7 @@ final_data_add  <- final_data_add |>
 
 ```{r}
 #| code-fold: true
+#| echo: false
 #| code-summary: "Standardize Numerical Data and Define Final Data for Analysis"
 
 
@@ -440,7 +435,9 @@ final_data_analysis  <- final_data_analysis %>%
 
 ```
 
-## Data Modelling
+## Key finding through data modelling
+
+From @tbl-pvalue, it tells about students whose performance remained the same, Class 10 students experienced a significantly higher rate of academic decline (p = 0.027). This suggests that the decline in performance was most prominent among Class 10 students.
 
 ```{r}
 #| echo: false
@@ -492,14 +489,12 @@ knitr::kable(
 
 
 ```
-From @tbl-pvalue, it tells about students whose performance remained the same, Class 10 students experienced a significantly higher rate of academic decline (p = 0.027). This suggests that the decline in performance was most prominent among Class 10 students.
 
-
-## Conclusion
+# Conclusion
 
 From the analysis of the data we can see that the p-values show the only significant variable to the academic performance is the level of education. From this we can infer that the groups mainly affected are students with public exams. This may be due to the fact that the students in those classes require more personal attention that online classes may not be able to provide.
 
-Recommendations:
+## Recommendations
 
 -   For data collection, we need more numeric variables as change in performance needs to be recorded more accurately for data analysis.
 
@@ -509,18 +504,4 @@ Recommendations:
 
 -   Additional variables that measure quality of the interaction in the lecture, internet connection, and metrics on motivation to study would greatly increase the utility of the data.
 
-
-# Results 
-
-The key variable in this report is academic performance. We compared the observations on the basis of the students' academic performance 
-
-From our regression analysis we we look into the the correlation between screen time and academic performance 
-
-In this analysis we assume that screen time is negatively correlated academic performance, meaning high screen time would result in poor academic performance 
-
-- Figure 
-
-Across all educational level students had the same proportion of results spread across the population. However we noticed in grade 10 and grade 12, majority students had unchanged grades. 
-
-During grade 11 and grade 12 student sit for a board exam. Given our observation from the data set - could this mean online learning had no effect among students who sat for board exam?
-
+# References
