@@ -51,7 +51,7 @@ library(tidytable)
 
 In this report, we will be looking at how the change from in-person learning to online learning during the period of COVID-19 has affected student's academic performance. The main findings are that the students are able to maintain their academic progress regardless of the change. However, considering the dataset it based on students in India, the groups that were mainly affected by the change were students in Class 10 and Class 12, who had public exams to prepare for in those years.
 
-## Introduction
+# Introduction
 
 The transition to online learning during the COVID-19 pandemic significantly altered many students’ academic environments and daily routines. Widespread increases in screen exposure, reductions in physical activity, and irregular sleep patterns were observed among students. These lifestyle changes have prompted growing concern regarding their potential impact on mental health, particularly with respect to stress, anxiety, and academic performance. Understanding how such factors influence student well-being is essential, especially as digital learning continues to play a central role in education.
 
@@ -282,41 +282,46 @@ ggplot(df_summary, aes(x = prop, y = value, fill = var_val)) +
 #| code-summary: "Chart for Categorical Variables"
 #| message: false
 
-library(scales)
-
-# Categorical variables to plot
+# Categorical Variables
 categorical_vars <- c("Gender", "Education_Level", "Stress_Level", "Anxious_Before_Exams")
 
-# Define pastel color palette
+# Set up the colours
 pastel_colors <- c(
   "Declined" = "#FFD1BA",  
   "Same"     = "#C3CDE6", 
   "Improved" = "#C0E7D5"   
 )
 
-# Plot
-final_data %>%
+# Generate plot
+p <- final_data %>%
   select(all_of(categorical_vars), Academic_Performance_Change) %>%
   pivot_longer(cols = all_of(categorical_vars), names_to = "variable", values_to = "value") %>%
   drop_na() %>%
+  mutate(
+    variable = gsub("_", " ", variable),
+    variable = factor(variable, levels = c("Gender", "Education Level", "Stress Level", "Anxious Before Exams"))  
+  ) %>%
   group_by(variable, value, Academic_Performance_Change) %>%
   summarise(n = n(), .groups = "drop") %>%
   group_by(variable, value) %>%
   mutate(
-    prop = n / sum(n),
-    variable = gsub("_", " ", variable)
+    prop = n / sum(n)
+    # label_text = percent(prop, accuracy = 1) # <-- No longer needed
   ) %>%
+  ungroup() %>%
   ggplot(aes(
     x = value,
     y = prop,
-    fill = factor(Academic_Performance_Change, levels = c("Declined", "Same", "Improved"))
+    fill = factor(Academic_Performance_Change, levels = c("Declined", "Improved", "Same"))
   )) +
   geom_bar(stat = "identity", position = "stack", color = "white") +
-  facet_wrap(~variable, scales = "free_x") +
+  # geom_text(...) removed to eliminate labels inside bars
+  facet_wrap(vars(variable), scales = "free_x", ncol = 2) +
   scale_y_continuous(labels = percent_format(accuracy = 1)) +
-  scale_fill_manual(values = pastel_colors) +
+  scale_fill_manual(values = pastel_colors) + 
   labs(
-    x = NULL,
+    title = " ",
+    x = "Categorical Variables",
     y = "Proportion",
     fill = "Performance Change"
   ) +
@@ -326,6 +331,8 @@ final_data %>%
     strip.text = element_text(face = "bold"),
     plot.title = element_text(size = 14, face = "bold", hjust = 0.5)
   )
+
+print(p)
 
 
 
